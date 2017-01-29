@@ -1,8 +1,7 @@
-= Based on that build =
+## Based on
 https://www.dropbox.com/sh/t52c02rm20y8x9p/khFGAJu3gc
 
-= HOWTO =
-
+## HOWTO
 
 ./WNDR3700-trunk-r50082-20170122-1044-newBuildroot.sh
 
