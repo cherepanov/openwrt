@@ -1,0 +1,74 @@
+diff --git a/applications/luci-app-statistics/root/etc/config/luci_statistics b/applications/luci-app-statistics/root/etc/config/luci_statistics
+index 774a8382e..1aa1136db 100644
+--- a/applications/luci-app-statistics/root/etc/config/luci_statistics
++++ b/applications/luci-app-statistics/root/etc/config/luci_statistics
+@@ -50,7 +50,7 @@ config statistics 'collectd_unixsock'
+ # input plugins
+ 
+ config statistics 'collectd_conntrack'
+-	option enable '0'
++	option enable '1'
+ 
+ config statistics 'collectd_cpu'
+ 	option enable '1'
+diff --git a/collections/luci-ssl-openssl/Makefile b/collections/luci-ssl-openssl/Makefile
+index b5f4b091b..176122bdd 100644
+--- a/collections/luci-ssl-openssl/Makefile
++++ b/collections/luci-ssl-openssl/Makefile
+@@ -14,7 +14,7 @@ LUCI_DESCRIPTION:=LuCI with OpenSSL as the SSL backend (libustream-openssl). \
+  Note: px5g still requires libmbedtls (in LEDE) or libpolarssl (in Openwrt). \
+  In LEDE it is also possible to replace px5g with openssl-util as uhttpd can \
+  also generate keys with openssl commandline tools if px5g is not installed.
+-LUCI_DEPENDS:=+luci +libustream-openssl +px5g
++LUCI_DEPENDS:=+luci +libustream-openssl +px5g +openssl-util
+ 
+ include ../../luci.mk
+ 
+diff --git a/modules/luci-base/root/etc/config/luci b/modules/luci-base/root/etc/config/luci
+index baa3ac5d1..c2262908b 100644
+--- a/modules/luci-base/root/etc/config/luci
++++ b/modules/luci-base/root/etc/config/luci
+@@ -22,3 +22,5 @@ config internal ccache
+ 	option enable 1
+ 		
+ config internal themes
++	option Bootstrap '/luci-static/bootstrap'
++
+diff --git a/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm b/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
+index 3e3f65d91..8c7732c7a 100644
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
+@@ -40,6 +40,7 @@
+ 			</form>
+ 			<% end %>
+ 		</div>
++		<div class="cbi-section-descr"><%:Note: The 'push for five seconds' requirement has been removed from the reset button. When you press the reset button, the router clears the jffs2 overlay partition completely and thus reverts to the original configuration files included in the firmware.%></div>
+ 		<br />
+ 		<div class="cbi-section-descr"><%:To restore configuration files, you can upload a previously generated backup archive here.%></div>
+ 		<div class="cbi-section-node">
+diff --git a/themes/luci-theme-bootstrap/root/etc/uci-defaults/30_luci-theme-bootstrap b/themes/luci-theme-bootstrap/root/etc/uci-defaults/30_luci-theme-bootstrap
+index 09299e092..c18d369ba 100755
+--- a/themes/luci-theme-bootstrap/root/etc/uci-defaults/30_luci-theme-bootstrap
++++ b/themes/luci-theme-bootstrap/root/etc/uci-defaults/30_luci-theme-bootstrap
+@@ -1,7 +1,7 @@
+ #!/bin/sh
+ uci batch <<-EOF
+ 	set luci.themes.Bootstrap=/luci-static/bootstrap
+-	set luci.main.mediaurlbase=/luci-static/bootstrap
++#	set luci.main.mediaurlbase=/luci-static/bootstrap
+ 	commit luci
+ EOF
+ exit 0
+diff --git a/themes/luci-theme-material/root/etc/uci-defaults/30_luci-theme-material b/themes/luci-theme-material/root/etc/uci-defaults/30_luci-theme-material
+index b01337821..983fc3808 100755
+--- a/themes/luci-theme-material/root/etc/uci-defaults/30_luci-theme-material
++++ b/themes/luci-theme-material/root/etc/uci-defaults/30_luci-theme-material
+@@ -1,7 +1,7 @@
+ #!/bin/sh
+ uci batch <<-EOF
+ 	set luci.themes.Material=/luci-static/material
+-	set luci.main.mediaurlbase=/luci-static/material
++#	set luci.main.mediaurlbase=/luci-static/material
+ 	commit luci
+ EOF
+ exit 0

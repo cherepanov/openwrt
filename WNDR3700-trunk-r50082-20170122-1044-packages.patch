@@ -1,0 +1,26 @@
+diff --git a/net/adblock/files/adblock.conf b/net/adblock/files/adblock.conf
+index aaf6eef4..d1378229 100644
+--- a/net/adblock/files/adblock.conf
++++ b/net/adblock/files/adblock.conf
+@@ -2,7 +2,7 @@
+ # see 'https://github.com/openwrt/packages/blob/master/net/adblock/files/README.md'
+ 
+ config adblock 'global'
+-	option adb_enabled '1'
++	option adb_enabled '0'
+ 	option adb_debug '0'
+ 	option adb_whitelist '/etc/adblock/adblock.whitelist'
+ 	option adb_whitelist_rset '\$1 ~/^([A-Za-z0-9_-]+\.){1,}[A-Za-z]+/{print tolower(\"^\"\$1\"\\\|[.]\"\$1)}'
+diff --git a/net/vsftpd/files/vsftpd.conf b/net/vsftpd/files/vsftpd.conf
+index 7d46506e..c04f6a3a 100644
+--- a/net/vsftpd/files/vsftpd.conf
++++ b/net/vsftpd/files/vsftpd.conf
+@@ -1,7 +1,7 @@
+ background=YES
+ listen=YES
+ anonymous_enable=NO
+-local_enable=YES
++local_enable=NO
+ write_enable=YES
+ local_umask=022
+ check_shell=NO

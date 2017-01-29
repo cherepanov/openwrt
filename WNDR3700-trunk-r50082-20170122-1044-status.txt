@@ -1,0 +1,75 @@
+trunk-r50082-20170122-1044
+
+######################################################
+
+origin	https://github.com/openwrt/openwrt.git (fetch)
+* master
+2017-01-16 4e53a6e9c5 Merge pull request #142 from kochstefa
+A  .config.init
+M  .gitignore
+A  files/etc/Compile_info.txt
+A  files/etc/applyHNsettings.sh
+A  files/etc/checksettings.sh
+A  files/etc/config/fstab
+A  files/etc/hotplug.d/ntp/20-ntpd-logger
+A  files/etc/lan-repeater.sh
+A  files/etc/rc.button/BTN_2
+A  files/etc/reinstall-packages.sh
+A  files/etc/saveHNsettings.sh
+A  files/etc/wds-slave-set.sh
+A  hnscripts/copyPackages2tmp.sh
+A  hnscripts/createbuildinfo.sh
+A  hnscripts/kernelcompile.sh
+A  hnscripts/mountNcopy.sh
+A  hnscripts/newBuildroot.sh
+A  hnscripts/parallelcompile.sh
+A  hnscripts/singlecompile.sh
+A  hnscripts/timestampVersion.sh
+A  hnscripts/updateNmake.sh
+M  package/base-files/files/etc/config/system
+M  package/base-files/files/etc/rc.button/reset
+M  package/base-files/files/lib/functions.sh
+A  package/kernel/kmod-sched-cake/Makefile
+M  package/network/config/qos-scripts/files/etc/config/qos
+M  package/network/ipv6/6in4/files/6in4.sh
+M  package/network/services/dnsmasq/files/dhcp.conf
+M  package/network/services/hostapd/files/netifd.sh
+M  package/network/services/hostapd/files/wps-hotplug.sh
+M  package/network/services/uhttpd/Makefile
+M  package/network/services/uhttpd/files/uhttpd.init
+M  package/network/utils/iproute2/Makefile
+A  package/network/utils/iproute2/patches/950-add-cake-to-tc.patch
+M  package/system/fstools/files/fstab.init
+M  package/utils/busybox/files/ntpd-hotplug
+M  scripts/getver.sh
+?? .config.init040117
+?? .config.init131016
+?? files/etc/HNsettings.290916.cpt
+?? version.date
+
+######################################################
+
+origin	https://github.com/openwrt/luci.git (fetch)
+* master
+2017-01-22 3b46d84fa8 Merge pull request #967 from musashino
+M  applications/luci-app-statistics/root/etc/config/luci_statistics
+M  collections/luci-ssl-openssl/Makefile
+M  modules/luci-base/root/etc/config/luci
+M  modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
+M  themes/luci-theme-bootstrap/root/etc/uci-defaults/30_luci-theme-bootstrap
+M  themes/luci-theme-material/root/etc/uci-defaults/30_luci-theme-material
+
+######################################################
+
+origin	https://github.com/openwrt/packages.git (fetch)
+* master
+2017-01-22 272cbb0f38 Merge pull request #3567 from nikil/fp
+M  net/adblock/files/adblock.conf
+M  net/vsftpd/files/vsftpd.conf
+
+######################################################
+
+origin	https://github.com/openwrt-routing/packages.git (fetch)
+* master
+2017-01-18 0c7d59efa6 Merge pull request #259 from jow-/batm
+M  miniupnpd/files/upnpd.config

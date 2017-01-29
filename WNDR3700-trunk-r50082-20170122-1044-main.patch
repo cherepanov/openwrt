@@ -1,0 +1,1864 @@
+diff --git a/.config.init b/.config.init
+new file mode 100644
+index 0000000000..29d6751800
+--- /dev/null
++++ b/.config.init
+@@ -0,0 +1,117 @@
++# Use "make defconfig" to expand this to a full .config
++CONFIG_TARGET_ar71xx=y
++CONFIG_TARGET_ar71xx_generic_WNDR3700=y
++
++# Per-package build logs in <buildroot>/logs
++CONFIG_DEVEL=y
++CONFIG_BUILD_LOG=y
++
++# Debugging options (build gdbserver, include package debug)
++CONFIG_PACKAGE_gdbserver=m
++CONFIG_DEBUG=y
++
++# Longer waiting for failsafe button push
++CONFIG_IMAGEOPT=y
++CONFIG_PREINITOPT=y
++CONFIG_TARGET_PREINIT_TIMEOUT=5
++
++# Busybox tweaks
++CONFIG_BUSYBOX_CUSTOM=y
++#CONFIG_BUSYBOX_CONFIG_DIFF=y
++CONFIG_BUSYBOX_CONFIG_FEATURE_LESS_FLAGS=y
++CONFIG_BUSYBOX_CONFIG_FEATURE_LESS_REGEXP=y
++CONFIG_BUSYBOX_CONFIG_FEATURE_LESS_WINCH=y
++CONFIG_BUSYBOX_CONFIG_SHA256SUM=y
++
++# Add-on programs
++CONFIG_PACKAGE_htop=y
++CONFIG_PACKAGE_nano=y
++CONFIG_PACKAGE_ccrypt=y
++CONFIG_PACKAGE_curl=y
++CONFIG_LIBCURL_OPENSSL=y
++CONFIG_PACKAGE_vsftpd-tls=y
++CONFIG_PACKAGE_wget=y
++CONFIG_PACKAGE_patch=y
++CONFIG_PACKAGE_diffutils=y
++CONFIG_DROPBEAR_ECC=y
++
++# USB device mount & file systems support
++CONFIG_PACKAGE_block-mount=y
++CONFIG_PACKAGE_kmod-usb-storage=y
++CONFIG_PACKAGE_kmod-fs-cifs=y
++CONFIG_PACKAGE_kmod-fs-ext4=y
++CONFIG_PACKAGE_kmod-fs-hfsplus=y
++CONFIG_PACKAGE_kmod-fs-msdos=y
++CONFIG_PACKAGE_kmod-fs-ntfs=y
++CONFIG_PACKAGE_kmod-fs-vfat=y
++CONFIG_PACKAGE_kmod-nls-cp1250=y
++CONFIG_PACKAGE_kmod-nls-cp437=y
++CONFIG_PACKAGE_kmod-nls-cp850=y
++CONFIG_PACKAGE_kmod-nls-iso8859-1=y
++CONFIG_PACKAGE_kmod-nls-iso8859-15=y
++CONFIG_PACKAGE_kmod-nls-utf8=y
++
++# IPv6 support
++CONFIG_PACKAGE_6in4=y
++CONFIG_PACKAGE_6to4=y
++CONFIG_PACKAGE_6rd=y
++CONFIG_PACKAGE_aiccu=y
++
++# IPv6 NAT support (ip6tables NAT extensions, ipt-nat6 and nf-nat6 kmods)
++CONFIG_PACKAGE_ip6tables-mod-nat=y
++
++# WLAN/WPS support
++CONFIG_PACKAGE_hostapd-utils=y
++CONFIG_WPA_SUPPLICANT_INTERNAL=y
++CONFIG_WPA_MSG_MIN_PRIORITY=4
++CONFIG_PACKAGE_wpad=y
++# CONFIG_PACKAGE_wpad-mini is not set
++CONFIG_ATH_USER_REGD=y
++CONFIG_PACKAGE_ATH_DFS=y
++
++# Luci (SSL from OpenSSL)
++CONFIG_PACKAGE_luci-ssl-openssl=y
++CONFIG_PACKAGE_luci-mod-admin-full=y
++CONFIG_PACKAGE_luci-app-commands=y
++CONFIG_PACKAGE_luci-app-ddns=y
++CONFIG_PACKAGE_luci-app-upnp=y
++CONFIG_PACKAGE_luci-app-wol=y
++
++# Luci statistics
++CONFIG_PACKAGE_luci-app-statistics=y
++CONFIG_PACKAGE_collectd-mod-conntrack=y
++CONFIG_PACKAGE_collectd-mod-entropy=y
++CONFIG_PACKAGE_collectd-mod-ping=y
++CONFIG_PACKAGE_collectd-mod-uptime=y
++
++# QoS selection - currently SQM
++CONFIG_PACKAGE_luci-app-sqm=y
++#CONFIG_PACKAGE_luci-app-qos=y
++
++# Cake qdisc for SQM (requires also patch for tc)
++CONFIG_PACKAGE_kmod-sched-cake=y
++CONFIG_PACKAGE_sqm-scripts-extra=y
++
++# Build luci-theme-material, default is still bootstrap
++CONFIG_PACKAGE_luci-theme-material=y
++
++# 3G USB dongle
++CONFIG_PACKAGE_luci-proto-3g=y
++CONFIG_PACKAGE_kmod-usb-serial=y
++CONFIG_PACKAGE_kmod-usb-serial-wwan=y
++CONFIG_PACKAGE_usb-modeswitch=y
++
++# PPTP support
++CONFIG_PACKAGE_luci-proto-ppp=y
++CONFIG_PACKAGE_ppp-mod-pptp=y
++
++# iptables add-ons ipsec rtsp
++CONFIG_PACKAGE_kmod-ipt-nathelper-rtsp=y
++CONFIG_PACKAGE_iptables-mod-ipsec=y
++
++# Support for IETF BCP38
++CONFIG_PACKAGE_luci-app-bcp38=y
++
++# Adblock package with Luci support, initially disabled
++CONFIG_PACKAGE_luci-app-adblock=y
++
+diff --git a/.gitignore b/.gitignore
+index cd86e34cda..9a15a25f34 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -12,7 +12,6 @@
+ /logs
+ /feeds
+ /feeds.conf
+-/files
+ /package/feeds
+ /package/openwrt-packages
+ key-build*
+diff --git a/files/etc/Compile_info.txt b/files/etc/Compile_info.txt
+new file mode 100644
+index 0000000000..50772794ee
+--- /dev/null
++++ b/files/etc/Compile_info.txt
+@@ -0,0 +1,6 @@
++Openwrt Designated Driver r50082 / 2017-01-22 09:51
++---
++main      2017-01-16 4e53a6e9c5 Merge pull request #142 from kochstefa
++luci      2017-01-22 3b46d84fa8 Merge pull request #967 from musashino
++packages  2017-01-22 272cbb0f38 Merge pull request #3567 from nikil/fp
++routing   2017-01-18 0c7d59efa6 Merge pull request #259 from jow-/batm
+diff --git a/files/etc/applyHNsettings.sh b/files/etc/applyHNsettings.sh
+new file mode 100755
+index 0000000000..26de611655
+--- /dev/null
++++ b/files/etc/applyHNsettings.sh
+@@ -0,0 +1,10 @@
++#!/bin/sh
++cp -f $1 /tmp/HNsettings.cpt
++if [ "$?" -eq 0 ] ; then
++  ccdecrypt -vf /tmp/HNsettings.cpt
++  if [ "$?" -eq 0 ] ; then
++    tar -xzv -f /tmp/HNsettings -C /etc
++    chmod 744 /etc/dropbear/authorized_keys
++  fi
++fi
++
+diff --git a/files/etc/checksettings.sh b/files/etc/checksettings.sh
+new file mode 100755
+index 0000000000..6be8d5defd
+--- /dev/null
++++ b/files/etc/checksettings.sh
+@@ -0,0 +1,13 @@
++#!/bin/sh
++cd /etc/config
++for F in *
++do
++        echo
++        echo "===== $F ====="
++        uci -c /rom/etc/config export $F >/tmp/$F.default 2>/dev/null
++        case $? in 0) ;; *) echo '>> no default in /rom <<' ;; esac
++        uci export $F >/tmp/$F.current
++        diff /tmp/$F.default /tmp/$F.current
++        rm -f /tmp/$F.default /tmp/$F.current
++done
++
+diff --git a/files/etc/config/fstab b/files/etc/config/fstab
+new file mode 100644
+index 0000000000..4bc3fdc594
+--- /dev/null
++++ b/files/etc/config/fstab
+@@ -0,0 +1,11 @@
++config 'global'
++	option anon_swap  '0'
++	option anon_mount '1'
++	option auto_swap  '1'
++	option auto_mount '1'
++	option delay_root '0'
++	option check_fs   '0'
++
++## use 'block detect' to find out uuid, if you want device specific mount.
++## anon_mount enables the automatic mounting of /dev/sdXy to /mnt/sdXy
++
+diff --git a/files/etc/hotplug.d/ntp/20-ntpd-logger b/files/etc/hotplug.d/ntp/20-ntpd-logger
+new file mode 100644
+index 0000000000..7f1ff28f8b
+--- /dev/null
++++ b/files/etc/hotplug.d/ntp/20-ntpd-logger
+@@ -0,0 +1,4 @@
++#!/bin/sh
++[ $ACTION = "step" ]    && logger -t ntpd Time set, stratum=$stratum interval=$poll_interval offset=$offset
++[ $ACTION = "stratum" ] && logger -t ntpd Stratum change, stratum=$stratum interval=$poll_interval offset=$offset
++
+diff --git a/files/etc/lan-repeater.sh b/files/etc/lan-repeater.sh
+new file mode 100755
+index 0000000000..8a1cc0ce98
+--- /dev/null
++++ b/files/etc/lan-repeater.sh
+@@ -0,0 +1,30 @@
++#!/bin/sh
++uci set system.@system[0].hostname=OpenWrt2
++uci set network.lan.ipaddr=192.168.1.2
++uci set network.lan.ip6ifaceid='::2'
++uci set network.lan.gateway=192.168.1.1
++uci set network.lan.dns=192.168.1.1
++uci set network.sixxs.auto=0
++uci set network.henet.auto=0
++uci set network.lan6=interface
++uci set network.lan6.ifname=@lan
++uci set network.lan6.proto=dhcpv6
++uci set network.lan6.reqprefix=no
++uci set wireless.@wifi-device[0].channel=9
++uci set wireless.@wifi-iface[0].disabled=1
++uci set wireless.@wifi-device[1].channel=48
++uci set dhcp.lan.ignore=1
++uci set dhcp.lan.force=0
++uci delete dhcp.lan.dhcpv6
++uci delete dhcp.lan.ra
++uci delete dhcp.lan.ndp
++uci set upnpd.config.enable_natpmp=0
++uci set upnpd.config.enable_upnp=0
++uci commit dhcp
++uci commit network
++uci commit wireless
++uci commit system
++uci commit upnpd
++/etc/init.d/dnsmasq disable
++/etc/init.d/miniupnpd disable
++
+diff --git a/files/etc/rc.button/BTN_2 b/files/etc/rc.button/BTN_2
+new file mode 100755
+index 0000000000..6b1ad56cea
+--- /dev/null
++++ b/files/etc/rc.button/BTN_2
+@@ -0,0 +1,11 @@
++#!/bin/sh
++if [ "$BUTTON" = "BTN_2" ] && [ "$ACTION" = "pressed" ]; then
++    if [ $(wifi status | grep -c up...true) -gt 0 ]; then
++        logger "WiFi button used: WiFi down"
++        /sbin/wifi down
++    else
++        logger "WiFi button used: WiFi up"
++        /sbin/wifi up
++    fi
++fi
++
+diff --git a/files/etc/reinstall-packages.sh b/files/etc/reinstall-packages.sh
+new file mode 100755
+index 0000000000..4f3db82078
+--- /dev/null
++++ b/files/etc/reinstall-packages.sh
+@@ -0,0 +1,200 @@
++#! /bin/sh
++
++# Write a list of packages currently installed or read that list,
++# presumably after a firmware upgrade, in order to reinstall all packages
++# on that list not currently installed
++#
++# (c) 2013 Malte Forkel <malte.forkel@berlin.de>
++#
++# Version history
++#    0.2.0 - command interface
++#    0.1.0 - Initial release
++
++PCKGLIST=/etc/config/opkg.installed  # default package list
++SCRIPTNAME=$(basename $0)            # name of this script
++COMMAND=""                           # command to execute
++
++INSTLIST=$(mktemp)                   # list of packages to install
++PREQLIST=$(mktemp)                   # list of prerequisite packages
++
++UPDATE=false                         # update the package database
++OPKGOPT=""                           # options for opkg calls
++VERBOSE=false                        # be verbose
++
++cleanup () {
++    rm -f $INSTLIST $PREQLIST
++}
++
++echo_usage () {
++    echo \
++"Usage: $(basename $0) [options...] command [packagelist]
++
++Available commands:
++    help                print this help text
++    write               write a list of currently installed packages
++    install             install packages on list not currently installed
++    script              output a script to install missing packages
++
++Options:
++    -u                  update the package database
++    -t                  test only, execute opkg commands with --noaction
++    -v                  be verbose
++
++$SCRIPTNAME can be used to re-install those packages that were installed
++before a firmware upgrade but are not part of the new firmware image.
++
++Before the firmware upgrade, execute
++
++    $SCRIPTNAME [options...] write [packagelist]
++
++to save the list of currently installed packages. The default package list
++is '$PCKGLIST'. Save the package list in a place that will
++not be wiped out by the firmware upgrade or copy it to another computer
++before the upgrade.
++
++After the firmware upgrade, execute
++
++    $SCRIPTNAME [options...] install [packagelist]
++
++to re-install all packages that were not part of the firmware image.
++Alternatively, you can execute
++
++    $SCRIPTNAME [options...] script [packagelist]
++
++to output a shell script that will contain calls to opkg to install those
++missing packages. This might be useful if you want to check which packages
++would be installed of if you want to edit that list.
++
++In order for this script to work after a firmware upgrade or reboot, the
++opkg database must have been updated. You can use the option -u to do this.
++
++You can specify the option -t to test what $SCRIPTNAME would do. All calls
++to opkg will be made with the option --noaction. This does not influence
++the call to opkg to write the list of installed packages, though.
++"
++}
++
++trap cleanup SIGHUP SIGINT SIGTERM EXIT
++
++# parse command line options
++while getopts "htuvw" OPTS; do
++    case $OPTS in
++        t )
++            OPKGOPT="$OPKGOPT --noaction";;
++        u )
++            UPDATE=true;;
++        v )
++            VERBOSE=true;;
++        [h\?*] )
++            echo_usage
++            exit 0;;
++    esac
++done
++shift $(($OPTIND - 1))
++
++# Set the command
++COMMAND=$1
++
++# Set name of the package list
++if [ "x$2" != "x" ]; then
++    PCKGLIST="$2"
++fi
++
++#
++# Help
++#
++
++if [ "x$COMMAND" == "x" ]; then
++    echo "No command specified."
++    echo ""
++    COMMAND="help"
++fi
++
++if [ $COMMAND == "help" ]; then
++    echo_usage
++    exit 0
++fi
++
++#
++# Write
++#
++
++if [ $COMMAND = "write" ] ; then
++    if $VERBOSE; then
++        echo "Saving package list to $PCKGLIST"
++    fi
++    # NOTE: option --noaction not valid for list-installed
++    opkg list-installed > "$PCKGLIST"
++    exit 0
++fi
++
++#
++# Update
++#
++
++if $UPDATE; then
++    opkg $OPKGOPT update
++fi
++
++#
++# Check
++#
++
++if [ $COMMAND == "install" ] || [ $COMMAND == "script" ]; then
++    # detect uninstalled packages
++    if $VERBOSE && [ $COMMAND != "script" ]; then
++        echo "Checking packages... "
++    fi
++    cat "$PCKGLIST" | while read PACKAGE SEP VERSION; do
++        # opkg status is much faster than opkg info
++        # it only returns status of installed packages
++        #if ! opkg status $PACKAGE | grep -q "^Status:.* installed"; then
++        if [ "x$(opkg status $PACKAGE)" == "x" ]; then
++            # collect uninstalled packages
++            echo $PACKAGE >> $INSTLIST
++            # collect prerequisites
++            opkg info "$PACKAGE" |
++            awk "/^Depends: / {
++                                sub(\"Depends: \", \"\");   \
++                                gsub(\", \", \"\\n\");      \
++                                print >> \"$PREQLIST\";      \
++                              }"
++        fi
++    done
++fi
++
++#
++# Install or script
++#
++
++if [ $COMMAND == "install" ]; then
++    # install packages
++    cat "$INSTLIST" | while read PACKAGE; do
++        if grep -q "^$PACKAGE\$" "$PREQLIST"; then
++            # prerequisite package, will be installed automatically
++            if $VERBOSE; then
++                echo "$PACKAGE installed automatically"
++            fi
++        else
++            # install package
++            opkg $OPKGOPT install $PACKAGE
++        fi
++    done
++elif [ $COMMAND == "script" ]; then
++    # output install script
++    echo "#! /bin/sh"
++    cat "$INSTLIST" | while read PACKAGE; do
++        if ! grep -q "^$PACKAGE\$" "$PREQLIST"; then
++            echo "opkg install $PACKAGE"
++        fi
++    done
++else
++    echo "Unknown command '$COMMAND'."
++    echo ""
++    echo_usage
++    exit 1
++fi
++
++# clean up and exit
++exit 0
++
+diff --git a/files/etc/saveHNsettings.sh b/files/etc/saveHNsettings.sh
+new file mode 100755
+index 0000000000..e744a862a9
+--- /dev/null
++++ b/files/etc/saveHNsettings.sh
+@@ -0,0 +1,13 @@
++#!/bin/sh
++cd /etc
++tar -czv -f /tmp/HNsettings \
++  config/network config/wireless config/firewall config/dhcp config/sqm \
++  config/luci_statistics config/bcp38 config/vsftpd* \
++  vsftpd.conf aiccu.conf dropbear/authorized_keys adblock/adblock.whitelist
++if [ "$?" -eq 0 ] ; then
++  ccencrypt -vf /tmp/HNsettings
++  if [ "$?" -eq 0 ] ; then
++    cp -f /tmp/HNsettings.cpt /etc/HNsettings.$1.cpt
++  fi
++fi
++
+diff --git a/files/etc/wds-slave-set.sh b/files/etc/wds-slave-set.sh
+new file mode 100755
+index 0000000000..0c2cd08950
+--- /dev/null
++++ b/files/etc/wds-slave-set.sh
+@@ -0,0 +1,14 @@
++#!/bin/sh
++uci set dhcp.lan.ignore=1
++uci set network.henet.auto=0
++uci set network.sixxs.auto=0
++uci set network.lan.ipaddr=192.168.1.2
++uci set network.lan6=interface
++uci set network.lan6.ifname=@lan
++uci set network.lan6.proto=dhcpv6
++uci set network.lan6.reqprefix=no
++uci set wireless.@wifi-iface[1].mode=sta
++uci set wireless.@wifi-iface[1].wds=1
++uci commit dhcp
++uci commit network
++uci commit wireless
+diff --git a/hnscripts/copyPackages2tmp.sh b/hnscripts/copyPackages2tmp.sh
+new file mode 100755
+index 0000000000..36e22931b9
+--- /dev/null
++++ b/hnscripts/copyPackages2tmp.sh
+@@ -0,0 +1,21 @@
++#!/bin/sh
++#
++# copyPackages2tmp  -  Copy packages to router's /tmp directory
++
++#create new /etc/opkg/customfeeds.conf with base, luci, packages, routing
++cat <<EOF >/tmp/customfeeds.conf
++src/gz TmpBase file:/tmp/packages/base
++src/gz TmpLuci file:/tmp/packages/luci
++src/gz TmpPackages file:/tmp/packages/packages
++src/gz TmpRouting file:/tmp/packages/routing
++EOF
++
++#copy packages
++echo "Copy packages..."
++scp -r bin/ar71xx/packages root@192.168.1.1:/tmp/
++
++#copy and overwrite /etc/opkg/customfeeds.conf
++echo "Copy modified /etc/opkg/customfeeds.conf..."
++scp /tmp/customfeeds.conf root@192.168.1.1:/etc/opkg/customfeeds.conf
++echo "done."
++
+diff --git a/hnscripts/createbuildinfo.sh b/hnscripts/createbuildinfo.sh
+new file mode 100755
+index 0000000000..3eeacfb2fd
+--- /dev/null
++++ b/hnscripts/createbuildinfo.sh
+@@ -0,0 +1,64 @@
++#!/bin/sh
++#
++# createbuildinfo  -  Create info on current config and source code changes
++
++getGitInfo() {
++#params: directory patchfile infofile
++ echo "\n######################################################\n" >> $3
++ (cd $1
++  git diff HEAD > $2
++  git remote -v show | grep fetch >> $3
++  git branch --list >> $3
++  git show --format="%cd %h %s" --abbrev=10 --date=short | head -n 1 | cut -b1-60 >> $3
++  git status --porcelain >> $3
++ )
++}
++
++BinDir=$PWD/bin/ar71xx
++Device=WNDR3700
++Prefix=openwrt-ar71xx-generic
++
++Branch=`basename $PWD`
++echo process $Branch...
++VersTime=$Branch-`scripts/getver.sh`-`date +%Y%m%d-%H%M`
++TFile=$BinDir/$Device-$VersTime
++
++# cleanup old binaries & patches
++rm -f $BinDir/WNDR3*
++
++# remove unnecessary files
++rm -f $BinDir/*root* $BinDir/*vmlinux* $BinDir/*uImage*
++rm -f $BinDir/*-NA.img $BinDir/*3800ch* $BinDir/*wndrmac*
++
++# create status info and patches
++echo "$VersTime" > $TFile-status.txt
++getGitInfo . $TFile-main.patch $TFile-status.txt
++getGitInfo feeds/luci $TFile-luci.patch $TFile-status.txt
++getGitInfo feeds/packages $TFile-packages.patch $TFile-status.txt
++getGitInfo feeds/routing $TFile-routing.patch $TFile-status.txt
++sed -i -e 's/$/\r/' $TFile-status.txt
++
++# collect config info
++cp .config $TFile.config
++cp .config.init $TFile.config.init
++scripts/diffconfig.sh > $TFile.diffconfig 2>/dev/null
++
++# copy buildroot creation script and patch timestamp info
++cp hnscripts/newBuildroot.sh $TFile-newBuildroot.sh
++sed -i "s/^FILESTAMP=.*/FILESTAMP=$Device-$VersTime/" $TFile-newBuildroot.sh
++
++# cleanup checksum files
++grep -sh wndr3.*-squashfs $BinDir/md5sums $BinDir/sha256sums \
++  | sed -e 's/$/\r/' -e 's/'$Prefix'-//' -e 's/squash/sq/' \
++  > $TFile-checksums.txt
++rm -f $BinDir/md5sums $BinDir/sha256sums
++
++# rename firmware files
++cd $BinDir
++mv *wndr3700-squashfs-sysupgrade.bin WNDR3700-$VersTime-sqfs-sysupgrade.bin
++mv *wndr3700-squashfs-factory.img WNDR3700-$VersTime-sqfs-factory.img
++mv *wndr3700v2-squashfs-sysupgrade.bin WNDR3700v2-$VersTime-sqfs-sysupgrade.bin
++mv *wndr3700v2-squashfs-factory.img WNDR3700v2-$VersTime-sqfs-factory.img
++mv *wndr3800-squashfs-sysupgrade.bin WNDR3800-$VersTime-sqfs-sysupgrade.bin
++mv *wndr3800-squashfs-factory.img WNDR3800-$VersTime-sqfs-factory.img
++
+diff --git a/hnscripts/kernelcompile.sh b/hnscripts/kernelcompile.sh
+new file mode 100755
+index 0000000000..8bf93a3a53
+--- /dev/null
++++ b/hnscripts/kernelcompile.sh
+@@ -0,0 +1,9 @@
++#!/bin/bash
++#
++# kernelcompile  -  Clean & compile kernel using a single thread. No update.
++
++echo "...make kernel..."
++make target/linux/clean
++mkdir -p logs
++make target/linux/compile V=s 2>&1 | tee logs/build.log | grep -i -E "^make.*(error|[12345]...Entering dir)"
++
+diff --git a/hnscripts/mountNcopy.sh b/hnscripts/mountNcopy.sh
+new file mode 100755
+index 0000000000..1590197df0
+--- /dev/null
++++ b/hnscripts/mountNcopy.sh
+@@ -0,0 +1,31 @@
++#!/bin/sh
++#
++# mount & copy  -  Mount the Virtualbox shared folder and copy files to PC
++
++Mounttype=vboxsf
++Mountname=PCSHARE
++Mountpoint=/media/windows-share
++BinDir=bin/ar71xx
++
++echo Check for existing mount of the shared folder $Mountpoint
++df | grep $Mountpoint
++if [ "$?" -ne 0 ]; then
++  echo Mounting $Mountpoint as $Mountname...
++  sudo mount -t $Mounttype $Mountname $Mountpoint
++  [ "$?" -ne 0 ] && echo "Sudo/mount failed." && exit 1
++fi
++
++echo "\nCopy from $PWD ..."
++cp $BinDir/*bin $Mountpoint
++sleep 2
++cp $BinDir/*img $Mountpoint
++sleep 2
++cp $BinDir/*patch $Mountpoint
++sleep 1
++cp $BinDir/*sh $Mountpoint
++sleep 1
++cp $BinDir/*txt $Mountpoint
++sleep 1
++cp $BinDir/*config* $Mountpoint
++echo done.
++
+diff --git a/hnscripts/newBuildroot.sh b/hnscripts/newBuildroot.sh
+new file mode 100755
+index 0000000000..f8cca605a6
+--- /dev/null
++++ b/hnscripts/newBuildroot.sh
+@@ -0,0 +1,70 @@
++#!/bin/sh
++#
++# newBuildroot.sh
++#
++# Creates the build environment with the current directory as the root
++# To avoid problems with long paths, something like /Openwrt is preferable
++#
++# Script creates subdir for trunk or the release branch, and dl for downloads
++# Creates main source repository and luci, packages & routing feeds
++
++### Target definitions
++TARGET=trunk
++GITREPO=https://github.com/openwrt/openwrt.git
++
++## Current version
++FILESTAMP=WNDR3700-trunk-r49928-20160831-1025
++
++### Prerequisites for buildroot
++sudo apt-get install build-essential subversion libncurses5-dev zlib1g-dev
++sudo apt-get install gawk gcc-multilib flex git-core gettext libssl-dev
++
++### Prerequisites for being able to send patches to openwrt-devel
++sudo apt-get install git-email
++
++### Newly patched Ubuntu may not yet have the correct kernel headers.
++# sudo apt-get install linux-headers-$(uname -r)
++
++### download directory (outside main directory to protect from make distclean)
++mkdir -p dl
++
++### main directory
++mkdir -p $TARGET
++
++### checkout/clone and change to directory
++git clone $GITREPO $TARGET
++cd $TARGET
++
++### create symlink to dl (after git clone)
++ln -s ../dl dl
++
++### patch main source first to set feeds correctly
++### update the feeds, apply patches to feeds
++### re-create index to find new packages, finally install
++patch -p1 -i ../$FILESTAMP-main.patch
++scripts/feeds update -a
++(cd feeds/luci;     patch -p1 -i ../../../$FILESTAMP-luci.patch)
++(cd feeds/packages; patch -p1 -i ../../../$FILESTAMP-packages.patch)
++(cd feeds/routing;  patch -p1 -i ../../../$FILESTAMP-routing.patch)
++scripts/feeds update -i
++scripts/feeds install -a
++
++### chmod known script files executable
++chmod -f 755 files/etc/*.sh
++chmod -f 755 files/etc/rc.button/*
++
++### chmod buildscripts executable
++chmod -f 755 hnscripts/*.sh
++
++### add created/modified files in main repo to version control
++git add -f files
++git add -A
++
++### add created/modified files in feeds to version control
++(cd feeds/luci;     git add -A)
++(cd feeds/packages; git add -A)
++(cd feeds/routing;  git add -A)
++
++### initialise .config
++cp .config.init .config
++
+diff --git a/hnscripts/parallelcompile.sh b/hnscripts/parallelcompile.sh
+new file mode 100755
+index 0000000000..836f091b12
+--- /dev/null
++++ b/hnscripts/parallelcompile.sh
+@@ -0,0 +1,14 @@
++#!/bin/bash
++#
++# parallelcompile  -  Compile using multiple threads
++
++echo "...create version info file..."
++hnscripts/timestampVersion.sh
++echo "...make world..."
++mkdir -p logs
++make -j 3 V=s 2>&1 | tee logs/build.log | grep -i -E "^make.*(error|[12345]...Entering dir)"
++[ ${PIPESTATUS[0]} -ne 0 ] && exit 1
++echo -n "...create build info: "
++hnscripts/createbuildinfo.sh
++echo done.
++
+diff --git a/hnscripts/singlecompile.sh b/hnscripts/singlecompile.sh
+new file mode 100755
+index 0000000000..3fe4556ac0
+--- /dev/null
++++ b/hnscripts/singlecompile.sh
+@@ -0,0 +1,14 @@
++#!/bin/bash
++#
++# singlecompile  -  Compile using a single thread. For debug
++
++echo "...create version info file..."
++hnscripts/timestampVersion.sh
++echo "...make world..."
++mkdir -p logs
++make V=s 2>&1 | tee logs/build.log | grep -i -E "^make.*(error|[12345]...Entering dir)"
++[ ${PIPESTATUS[0]} -ne 0 ] && exit 1
++echo -n "...create build info: "
++hnscripts/createbuildinfo.sh
++echo done.
++
+diff --git a/hnscripts/timestampVersion.sh b/hnscripts/timestampVersion.sh
+new file mode 100755
+index 0000000000..446a51f335
+--- /dev/null
++++ b/hnscripts/timestampVersion.sh
+@@ -0,0 +1,18 @@
++#!/bin/bash
++#
++# timestampVersion  -  Collect source version info and insert it into firmware
++
++STATUSFILE=files/etc/Compile_info.txt
++Nickname=`grep RELEASE: include/{version,toplevel}.mk | cut -d "=" -f 2`
++
++echo Openwrt $Nickname `scripts/getver.sh` / `date "+%F %H:%M"` > $STATUSFILE
++echo "---" >> $STATUSFILE
++echo "main      "`(git show --format="%cd %h %s" --abbrev=10 --date=short | head -n 1 | cut -b1-60)` >> $STATUSFILE
++echo "luci      "`(cd feeds/luci && git show --format="%cd %h %s" --abbrev=10 --date=short | head -n 1 | cut -b1-60)` >> $STATUSFILE
++echo "packages  "`(cd feeds/packages && git show --format="%cd %h %s" --abbrev=10 --date=short | head -n 1 | cut -b1-60)` >> $STATUSFILE
++echo "routing   "`(cd feeds/routing && git show --format="%cd %h %s" --abbrev=10 --date=short | head -n 1 | cut -b1-60)` >> $STATUSFILE
++git add $STATUSFILE
++
++# Override git/svn timestamp after r48583-48594, set initial clock to now
++date +%s > version.date
++
+diff --git a/hnscripts/updateNmake.sh b/hnscripts/updateNmake.sh
+new file mode 100755
+index 0000000000..cb6a0e2f9e
+--- /dev/null
++++ b/hnscripts/updateNmake.sh
+@@ -0,0 +1,21 @@
++#!/bin/bash
++#
++# update & make  -  Update source code and continue to make the build
++
++umask 0022
++echo "...update main source..."
++git pull
++echo "...update feeds..."
++./scripts/feeds update -a
++[ "$?" -ne 0 ] && echo "Updating the feeds failed." && exit 1
++echo "...install feeds..."
++./scripts/feeds install -a
++echo "...make defconfig..."
++make defconfig
++#echo "...make menuconfig..."
++#make menuconfig
++echo "...download new source packages..."
++make download
++echo "...make the firmware..."
++hnscripts/parallelcompile.sh
++
+diff --git a/package/base-files/files/etc/config/system b/package/base-files/files/etc/config/system
+index ea0b821f93..67a88486e6 100644
+--- a/package/base-files/files/etc/config/system
++++ b/package/base-files/files/etc/config/system
+@@ -1,6 +1,8 @@
+ config system
+ 	option hostname	OpenWrt
+-	option timezone	UTC
++	option zonename 'Europe/Helsinki'
++	option timezone 'EET-2EEST,M3.5.0/3,M10.5.0/4'
++	option log_size '64'
+ 	option ttylogin	0
+ 
+ config timeserver ntp
+diff --git a/package/base-files/files/etc/rc.button/reset b/package/base-files/files/etc/rc.button/reset
+index c6dc7cfbc0..a255a6276e 100755
+--- a/package/base-files/files/etc/rc.button/reset
++++ b/package/base-files/files/etc/rc.button/reset
+@@ -11,16 +11,8 @@ timeout)
+ 	set_state failsafe
+ ;;
+ released)
+-	if [ "$SEEN" -lt 1 ]
+-	then
+-		echo "REBOOT" > /dev/console
+-		sync
+-		reboot
+-	elif [ "$SEEN" -gt 5 ]
+-	then
+ 		echo "FACTORY RESET" > /dev/console
+ 		jffs2reset -y && reboot &
+-	fi
+ ;;
+ esac
+ 
+diff --git a/package/base-files/files/lib/functions.sh b/package/base-files/files/lib/functions.sh
+index cf1fa4874a..e6c6822cec 100755
+--- a/package/base-files/files/lib/functions.sh
++++ b/package/base-files/files/lib/functions.sh
+@@ -220,26 +220,14 @@ default_postinst() {
+ 		ret=$?
+ 	fi
+ 
+-	if [ -z "$root" ] && grep -q -s "^/etc/uci-defaults/" "$root/usr/lib/opkg/info/${pkgname}.list"; then
+-		. /lib/functions/system.sh
+-		[ -d /tmp/.uci ] || mkdir -p /tmp/.uci
+-		cd /etc/uci-defaults
+-		for i in $(grep -s "^/etc/uci-defaults/" "$root/usr/lib/opkg/info/${pkgname}.list"); do
+-			( . "./$(basename $i)" ) && rm -f "$i"
+-		done
+-		uci commit
+-		cd $OLDPWD
+-	fi
+-
+ 	if [ -z "$root" ] && grep -q -s "^/etc/uci-defaults/" "/usr/lib/opkg/info/${pkgname}.list"; then
+ 		. /lib/functions/system.sh
+ 		[ -d /tmp/.uci ] || mkdir -p /tmp/.uci
+-		cd /etc/uci-defaults
+-		for i in $(grep -s "^/etc/uci-defaults/" "/usr/lib/opkg/info/${pkgname}.list"); do
+-			( . "./$(basename $i)" ) && rm -f "$i"
+-		done
++		for i in $(sed -ne 's!^/etc/uci-defaults/!!p' "/usr/lib/opkg/info/${pkgname}.list"); do (
++			cd /etc/uci-defaults
++			[ -f "$i" ] && . "$i" && rm -f "$i"
++		) done
+ 		uci commit
+-		cd $OLDPWD
+ 	fi
+ 
+ 	[ -n "$root" ] || rm -f /tmp/luci-indexcache 2>/dev/null
+diff --git a/package/kernel/kmod-sched-cake/Makefile b/package/kernel/kmod-sched-cake/Makefile
+new file mode 100644
+index 0000000000..fd029fd68a
+--- /dev/null
++++ b/package/kernel/kmod-sched-cake/Makefile
+@@ -0,0 +1,44 @@
++#
++# Copyright (C) 2016 LEDE
++#
++# This is free software, licensed under the GNU General Public License v2.
++# See /LICENSE for more information.
++#
++
++include $(TOPDIR)/rules.mk
++include $(INCLUDE_DIR)/kernel.mk
++
++PKG_NAME:=sched-cake
++PKG_SOURCE_VERSION:=70c8eb766d5afcf3cf187594b7cd776da92bee3c
++PKG_VERSION:=2016-12-19-$(PKG_SOURCE_VERSION)
++PKG_RELEASE:=1
++
++PKG_SOURCE_PROTO:=git
++PKG_SOURCE_URL:=https://github.com/kdarbyshirebryant/sch_cake.git
++PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
++PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
++PKG_MIRROR_MD5SUM:=fcac68c73a822e67819bd3206a14f19159275fae19ab3cf01dbbcffaa975cb47
++PKG_MAINTAINER:=Kevin Darbyshire-Bryant <kevin@darbyshire-bryant.me.uk>
++
++include $(INCLUDE_DIR)/package.mk
++
++define KernelPackage/sched-cake
++  SUBMENU:=Network Support
++  TITLE:=Cake fq_codel/blue derived shaper
++  URL:=https://github.com/dtaht/sch_cake
++  FILES:=$(PKG_BUILD_DIR)/sch_cake.ko
++  AUTOLOAD:=$(call AutoLoad,75,sch_cake)
++  DEPENDS:=+kmod-ipt-conntrack
++endef
++
++include $(INCLUDE_DIR)/kernel-defaults.mk
++
++define KernelPackage/sched-cake/description
++  Common Applications Kept Enhanced fq_codel/blue derived shaper
++endef
++
++define Build/Compile
++	$(MAKE) $(KERNEL_MAKEOPTS) SUBDIRS="$(PKG_BUILD_DIR)" modules
++endef
++
++$(eval $(call KernelPackage,sched-cake))
+diff --git a/package/network/config/qos-scripts/files/etc/config/qos b/package/network/config/qos-scripts/files/etc/config/qos
+index 44e988a67a..334d8128fd 100644
+--- a/package/network/config/qos-scripts/files/etc/config/qos
++++ b/package/network/config/qos-scripts/files/etc/config/qos
+@@ -4,8 +4,8 @@
+ config interface wan
+ 	option classgroup  "Default"
+ 	option enabled      0
+-	option upload       128
+-	option download     1024
++	option upload       10000
++	option download     85000
+ 
+ # RULES:
+ config classify
+diff --git a/package/network/ipv6/6in4/files/6in4.sh b/package/network/ipv6/6in4/files/6in4.sh
+index c358a222fa..90b03dd959 100755
+--- a/package/network/ipv6/6in4/files/6in4.sh
++++ b/package/network/ipv6/6in4/files/6in4.sh
+@@ -11,7 +11,7 @@
+ 
+ proto_6in4_update() {
+ 	sh -c '
+-		local timeout=5
++		timeout=8
+ 
+ 		(while [ $((timeout--)) -gt 0 ]; do
+ 			sleep 1
+diff --git a/package/network/services/dnsmasq/files/dhcp.conf b/package/network/services/dnsmasq/files/dhcp.conf
+index 362b90a293..279b2c0889 100644
+--- a/package/network/services/dnsmasq/files/dhcp.conf
++++ b/package/network/services/dnsmasq/files/dhcp.conf
+@@ -10,6 +10,7 @@ config dnsmasq
+ 	option domain	'lan'
+ 	option expandhosts	1
+ 	option nonegcache	0
++	option cachesize	1000
+ 	option authoritative	1
+ 	option readethers	1
+ 	option leasefile	'/tmp/dhcp.leases'
+diff --git a/package/network/services/hostapd/files/netifd.sh b/package/network/services/hostapd/files/netifd.sh
+index 005112d828..6507d9e5f4 100644
+--- a/package/network/services/hostapd/files/netifd.sh
++++ b/package/network/services/hostapd/files/netifd.sh
+@@ -333,6 +333,10 @@ hostapd_set_bss_options() {
+ 		set_default wps_device_type "6-0050F204-1"
+ 		set_default wps_device_name "OpenWrt AP"
+ 		set_default wps_manufacturer "openwrt.org"
++		# Set WPS label pin to original Netgear value stored in art partition
++		# Value for wps_pin can be overridden by /etc/config/wireless
++		local PINdefault="$(dd if=/dev/mtdblock6 bs=1 skip=18 count=8 2>/dev/null)"
++		set_default wps_pin "$PINdefault"
+ 
+ 		wps_state=2
+ 		[ -n "$wps_configured" ] && wps_state=1
+diff --git a/package/network/services/hostapd/files/wps-hotplug.sh b/package/network/services/hostapd/files/wps-hotplug.sh
+index 24af80e55b..369e09c3a5 100644
+--- a/package/network/services/hostapd/files/wps-hotplug.sh
++++ b/package/network/services/hostapd/files/wps-hotplug.sh
+@@ -1,11 +1,16 @@
+ #!/bin/sh
+ 
+ if [ "$ACTION" = "pressed" -a "$BUTTON" = "wps" ]; then
++	logger "WPS button pressed, looking for active radios"
++	echo "255" > /sys/devices/platform/leds-gpio/leds/netgear:green:wps/brightness
+ 	cd /var/run/hostapd
+ 	for socket in *; do
+ 		[ -S "$socket" ] || continue
++		logger "WPS activated for: $socket"
+ 		hostapd_cli -i "$socket" wps_pbc
+ 	done
++	sleep 120
++	echo "0" > /sys/devices/platform/leds-gpio/leds/netgear:green:wps/brightness
+ fi
+ 
+ return 0
+diff --git a/package/network/services/uhttpd/Makefile b/package/network/services/uhttpd/Makefile
+index b7238567a8..f633843fd2 100644
+--- a/package/network/services/uhttpd/Makefile
++++ b/package/network/services/uhttpd/Makefile
+@@ -8,7 +8,7 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=uhttpd
+-PKG_VERSION:=2015-11-08
++PKG_VERSION:=2016-10-05
+ PKG_RELEASE=$(PKG_SOURCE_VERSION)
+ 
+ PKG_SOURCE_PROTO:=git
+diff --git a/package/network/services/uhttpd/files/uhttpd.init b/package/network/services/uhttpd/files/uhttpd.init
+index d411d2aaf5..336f885be9 100755
+--- a/package/network/services/uhttpd/files/uhttpd.init
++++ b/package/network/services/uhttpd/files/uhttpd.init
+@@ -7,6 +7,7 @@ USE_PROCD=1
+ 
+ UHTTPD_BIN="/usr/sbin/uhttpd"
+ PX5G_BIN="/usr/sbin/px5g"
++OPENSSL_BIN="/usr/bin/openssl"
+ 
+ append_arg() {
+ 	local cfg="$1"
+@@ -43,10 +44,15 @@ generate_keys() {
+ 	config_get location   "$cfg" location
+ 	config_get commonname "$cfg" commonname
+ 
+-	[ -x "$PX5G_BIN" ] && {
+-		$PX5G_BIN selfsigned -der \
++	# Prefer px5g for certificate generation (existence evaluated last)
++	local GENKEY_CMD=""
++	local UNIQUEID=$(dd if=/dev/urandom bs=1 count=4 | hexdump -e '1/1 "%02x"')
++	[ -x "$OPENSSL_BIN" ] && GENKEY_CMD="$OPENSSL_BIN req -x509 -outform der -nodes"
++	[ -x "$PX5G_BIN" ] && GENKEY_CMD="$PX5G_BIN selfsigned -der"
++	[ -n "$GENKEY_CMD" ] && {
++		$GENKEY_CMD \
+ 			-days ${days:-730} -newkey rsa:${bits:-2048} -keyout "${UHTTPD_KEY}.new" -out "${UHTTPD_CERT}.new" \
+-			-subj /C="${country:-DE}"/ST="${state:-Saxony}"/L="${location:-Leipzig}"/CN="${commonname:-OpenWrt}"
++			-subj /C="${country:-DE}"/ST="${state:-Saxony}"/L="${location:-Leipzig}"/O="${commonname:-Openwrt}$UNIQUEID"/CN="${commonname:-OpenWrt}"
+ 		sync
+ 		mv "${UHTTPD_KEY}.new" "${UHTTPD_KEY}"
+ 		mv "${UHTTPD_CERT}.new" "${UHTTPD_CERT}"
+diff --git a/package/network/utils/iproute2/Makefile b/package/network/utils/iproute2/Makefile
+index a7686cb82c..74644912fc 100644
+--- a/package/network/utils/iproute2/Makefile
++++ b/package/network/utils/iproute2/Makefile
+@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=iproute2
+ PKG_VERSION:=4.4.0
+-PKG_RELEASE:=1
++PKG_RELEASE:=2
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+ PKG_SOURCE_URL:=http://kernel.org/pub/linux/utils/net/iproute2/
+diff --git a/package/network/utils/iproute2/patches/950-add-cake-to-tc.patch b/package/network/utils/iproute2/patches/950-add-cake-to-tc.patch
+new file mode 100644
+index 0000000000..49f0f97aed
+--- /dev/null
++++ b/package/network/utils/iproute2/patches/950-add-cake-to-tc.patch
+@@ -0,0 +1,738 @@
++--- a/include/linux/pkt_sched.h
+++++ b/include/linux/pkt_sched.h
++@@ -877,4 +877,59 @@ struct tc_pie_xstats {
++ 	__u32 maxq;             /* maximum queue size */
++ 	__u32 ecn_mark;         /* packets marked with ecn*/
++ };
+++
+++/* CAKE */
+++enum {
+++	TCA_CAKE_UNSPEC,
+++	TCA_CAKE_BASE_RATE,
+++	TCA_CAKE_DIFFSERV_MODE,
+++	TCA_CAKE_ATM,
+++	TCA_CAKE_FLOW_MODE,
+++	TCA_CAKE_OVERHEAD,
+++	TCA_CAKE_RTT,
+++	TCA_CAKE_TARGET,
+++	TCA_CAKE_AUTORATE,
+++	TCA_CAKE_MEMORY,
+++	TCA_CAKE_NAT,
+++	TCA_CAKE_ETHERNET,
+++	TCA_CAKE_WASH,
+++	__TCA_CAKE_MAX
+++};
+++#define TCA_CAKE_MAX	(__TCA_CAKE_MAX - 1)
+++
+++struct tc_cake_traffic_stats {
+++	__u32 packets;
+++	__u32 link_ms;
+++	__u64 bytes;
+++};
+++
+++#define TC_CAKE_MAX_TINS (8)
+++struct tc_cake_xstats {
+++	__u16 version;  /* == 4, increments when struct extended */
+++	__u8  max_tins; /* == TC_CAKE_MAX_TINS */
+++	__u8  tin_cnt;  /* <= TC_CAKE_MAX_TINS */
+++
+++	__u32 threshold_rate   [TC_CAKE_MAX_TINS];
+++	__u32 target_us        [TC_CAKE_MAX_TINS];
+++	struct tc_cake_traffic_stats sent      [TC_CAKE_MAX_TINS];
+++	struct tc_cake_traffic_stats dropped   [TC_CAKE_MAX_TINS];
+++	struct tc_cake_traffic_stats ecn_marked[TC_CAKE_MAX_TINS];
+++	struct tc_cake_traffic_stats backlog   [TC_CAKE_MAX_TINS];
+++	__u32 interval_us      [TC_CAKE_MAX_TINS];
+++	__u32 way_indirect_hits[TC_CAKE_MAX_TINS];
+++	__u32 way_misses       [TC_CAKE_MAX_TINS];
+++	__u32 way_collisions   [TC_CAKE_MAX_TINS];
+++	__u32 peak_delay_us    [TC_CAKE_MAX_TINS]; /* ~= delay to bulk flows */
+++	__u32 avge_delay_us    [TC_CAKE_MAX_TINS];
+++	__u32 base_delay_us    [TC_CAKE_MAX_TINS]; /* ~= delay to sparse flows */
+++	__u16 sparse_flows     [TC_CAKE_MAX_TINS];
+++	__u16 bulk_flows       [TC_CAKE_MAX_TINS];
+++	__u16 unresponse_flows [TC_CAKE_MAX_TINS]; /* v4 - was u32 last_len  */
+++	__u16 spare            [TC_CAKE_MAX_TINS]; /* v4 - split last_len */
+++	__u32 max_skblen       [TC_CAKE_MAX_TINS];
+++	__u32 capacity_estimate;  /* version 2 */
+++	__u32 memory_limit;       /* version 3 */
+++	__u32 memory_used;        /* version 3 */
+++};
+++
++ #endif
++--- a/tc/Makefile
+++++ b/tc/Makefile
++@@ -64,6 +64,7 @@ TCMODULES += q_codel.o
++ TCMODULES += q_fq_codel.o
++ TCMODULES += q_fq.o
++ TCMODULES += q_pie.o
+++TCMODULES += q_cake.o
++ TCMODULES += q_hhf.o
++ TCMODULES += e_bpf.o
++ 
++--- /dev/null
+++++ b/tc/q_cake.c
++@@ -0,0 +1,663 @@
+++/*
+++ * Common Applications Kept Enhanced  --  CAKE
+++ *
+++ *  Copyright (C) 2014-2015 Jonathan Morton <chromatix99@gmail.com>
+++ *
+++ * Redistribution and use in source and binary forms, with or without
+++ * modification, are permitted provided that the following conditions
+++ * are met:
+++ * 1. Redistributions of source code must retain the above copyright
+++ *    notice, this list of conditions, and the following disclaimer,
+++ *    without modification.
+++ * 2. Redistributions in binary form must reproduce the above copyright
+++ *    notice, this list of conditions and the following disclaimer in the
+++ *    documentation and/or other materials provided with the distribution.
+++ * 3. The names of the authors may not be used to endorse or promote products
+++ *    derived from this software without specific prior written permission.
+++ *
+++ * Alternatively, provided that this notice is retained in full, this
+++ * software may be distributed under the terms of the GNU General
+++ * Public License ("GPL") version 2, in which case the provisions of the
+++ * GPL apply INSTEAD OF those given above.
+++ *
+++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+++ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+++ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+++ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+++ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+++ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+++ * DAMAGE.
+++ *
+++ */
+++
+++#include <stddef.h>
+++#include <stdio.h>
+++#include <stdlib.h>
+++#include <unistd.h>
+++#include <syslog.h>
+++#include <fcntl.h>
+++#include <sys/socket.h>
+++#include <netinet/in.h>
+++#include <arpa/inet.h>
+++#include <string.h>
+++
+++#include "utils.h"
+++#include "tc_util.h"
+++
+++static void explain(void)
+++{
+++	fprintf(stderr, "Usage: ... cake [ bandwidth RATE | unlimited* | autorate_ingress ]\n"
+++	                "                [ rtt TIME | datacentre | lan | metro | regional | internet* | oceanic | satellite | interplanetary ]\n"
+++	                "                [ besteffort | precedence | diffserv8 | diffserv4 | diffserv-llt | diffserv3* ]\n"
+++	                "                [ flowblind | srchost | dsthost | hosts | flows | dual-srchost | dual-dsthost | triple-isolate* ] [ nat | nonat* ]\n"
+++	                "                [ ptm | atm | noatm* ] [ overhead N | conservative | raw* ]\n"
+++	                "                [ wash | nowash* ]\n"
+++	                "                [ memlimit LIMIT ]\n"
+++	                "    (* marks defaults)\n");
+++}
+++
+++static int cake_parse_opt(struct qdisc_util *qu, int argc, char **argv,
+++			      struct nlmsghdr *n)
+++{
+++	int unlimited = 0;
+++	unsigned bandwidth = 0;
+++	unsigned interval = 0;
+++	unsigned target = 0;
+++	unsigned diffserv = 0;
+++	unsigned memlimit = 0;
+++	int  overhead = 0;
+++	bool overhead_set = false;
+++	bool overhead_override = false;
+++	int wash = -1;
+++	int flowmode = -1;
+++	int nat = -1;
+++	int atm = -1;
+++	int autorate = -1;
+++	struct rtattr *tail;
+++
+++	while (argc > 0) {
+++		if (strcmp(*argv, "bandwidth") == 0) {
+++			NEXT_ARG();
+++			if (get_rate(&bandwidth, *argv)) {
+++				fprintf(stderr, "Illegal \"bandwidth\"\n");
+++				return -1;
+++			}
+++			unlimited = 0;
+++			autorate = 0;
+++		} else if (strcmp(*argv, "unlimited") == 0) {
+++			bandwidth = 0;
+++			unlimited = 1;
+++			autorate = 0;
+++		} else if (strcmp(*argv, "autorate_ingress") == 0) {
+++			autorate = 1;
+++
+++		} else if (strcmp(*argv, "rtt") == 0) {
+++			NEXT_ARG();
+++			if (get_time(&interval, *argv)) {
+++				fprintf(stderr, "Illegal \"rtt\"\n");
+++				return -1;
+++			}
+++			target = interval / 20;
+++			if(!target)
+++				target = 1;
+++		} else if (strcmp(*argv, "datacentre") == 0) {
+++			interval = 100;
+++			target   =   5;
+++		} else if (strcmp(*argv, "lan") == 0) {
+++			interval = 1000;
+++			target   =   50;
+++		} else if (strcmp(*argv, "metro") == 0) {
+++			interval = 10000;
+++			target   =   500;
+++		} else if (strcmp(*argv, "regional") == 0) {
+++			interval = 30000;
+++			target    = 1500;
+++		} else if (strcmp(*argv, "internet") == 0) {
+++			interval = 100000;
+++			target   =   5000;
+++		} else if (strcmp(*argv, "oceanic") == 0) {
+++			interval = 300000;
+++			target   =  15000;
+++		} else if (strcmp(*argv, "satellite") == 0) {
+++			interval = 1000000;
+++			target   =   50000;
+++		} else if (strcmp(*argv, "interplanetary") == 0) {
+++			interval = 3600000000U;
+++			target   =       5000;
+++
+++		} else if (strcmp(*argv, "besteffort") == 0) {
+++			diffserv = 1;
+++		} else if (strcmp(*argv, "precedence") == 0) {
+++			diffserv = 2;
+++		} else if (strcmp(*argv, "diffserv8") == 0) {
+++			diffserv = 3;
+++		} else if (strcmp(*argv, "diffserv4") == 0) {
+++			diffserv = 4;
+++		} else if (strcmp(*argv, "diffserv") == 0) {
+++			diffserv = 4;
+++		} else if (strcmp(*argv, "diffserv-llt") == 0) {
+++			diffserv = 5;
+++		} else if (strcmp(*argv, "diffserv3") == 0) {
+++			diffserv = 6;
+++
+++		} else if (strcmp(*argv, "nowash") == 0) {
+++			wash = 0;
+++		} else if (strcmp(*argv, "wash") == 0) {
+++			wash = 1;
+++
+++		} else if (strcmp(*argv, "flowblind") == 0) {
+++			flowmode = 0;
+++		} else if (strcmp(*argv, "srchost") == 0) {
+++			flowmode = 1;
+++		} else if (strcmp(*argv, "dsthost") == 0) {
+++			flowmode = 2;
+++		} else if (strcmp(*argv, "hosts") == 0) {
+++			flowmode = 3;
+++		} else if (strcmp(*argv, "flows") == 0) {
+++			flowmode = 4;
+++		} else if (strcmp(*argv, "dual-srchost") == 0) {
+++			flowmode = 5;
+++		} else if (strcmp(*argv, "dual-dsthost") == 0) {
+++			flowmode = 6;
+++		} else if (strcmp(*argv, "triple-isolate") == 0) {
+++			flowmode = 7;
+++
+++		} else if (strcmp(*argv, "nat") == 0) {
+++			nat = 1;
+++		} else if (strcmp(*argv, "nonat") == 0) {
+++			nat = 0;
+++
+++		} else if (strcmp(*argv, "ptm") == 0) {
+++			atm = 2;
+++		} else if (strcmp(*argv, "atm") == 0) {
+++			atm = 1;
+++		} else if (strcmp(*argv, "noatm") == 0) {
+++			atm = 0;
+++
+++		} else if (strcmp(*argv, "raw") == 0) {
+++			atm = 0;
+++			overhead = 0;
+++			overhead_set = true;
+++			overhead_override = true;
+++		} else if (strcmp(*argv, "conservative") == 0) {
+++			/*
+++			 * Deliberately over-estimate overhead:
+++			 * one whole ATM cell plus ATM framing.
+++			 * A safe choice if the actual overhead is unknown.
+++			 */
+++			atm = 1;
+++			overhead = 48;
+++			overhead_set = true;
+++
+++		/* Various ADSL framing schemes, all over ATM cells */
+++		} else if (strcmp(*argv, "ipoa-vcmux") == 0) {
+++			atm = 1;
+++			overhead += 8;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "ipoa-llcsnap") == 0) {
+++			atm = 1;
+++			overhead += 16;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "bridged-vcmux") == 0) {
+++			atm = 1;
+++			overhead += 24;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "bridged-llcsnap") == 0) {
+++			atm = 1;
+++			overhead += 32;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "pppoa-vcmux") == 0) {
+++			atm = 1;
+++			overhead += 10;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "pppoa-llc") == 0) {
+++			atm = 1;
+++			overhead += 14;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "pppoe-vcmux") == 0) {
+++			atm = 1;
+++			overhead += 32;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "pppoe-llcsnap") == 0) {
+++			atm = 1;
+++			overhead += 40;
+++			overhead_set = true;
+++
+++		/* Typical VDSL2 framing schemes, both over PTM */
+++		/* PTM has 64b/65b coding which absorbs some bandwidth */
+++		} else if (strcmp(*argv, "pppoe-ptm") == 0) {
+++			atm = 2;
+++			overhead += 27;
+++			overhead_set = true;
+++		} else if (strcmp(*argv, "bridged-ptm") == 0) {
+++			atm = 2;
+++			overhead += 19;
+++			overhead_set = true;
+++
+++		} else if (strcmp(*argv, "via-ethernet") == 0) {
+++			/*
+++			 * We used to use this flag to manually compensate for
+++			 * Linux including the Ethernet header on Ethernet-type
+++			 * interfaces, but not on IP-type interfaces.
+++			 *
+++			 * It is no longer needed, because Cake now adjusts for
+++			 * that automatically, and is thus ignored.
+++			 *
+++			 * It would be deleted entirely, but it appears in the
+++			 * stats output when the automatic compensation is active.
+++			 */
+++
+++		} else if (strcmp(*argv, "ethernet") == 0) {
+++			/* ethernet pre-amble & interframe gap & FCS
+++			 * you may need to add vlan tag */
+++			overhead += 38;
+++			overhead_set = true;
+++
+++		/* Additional Ethernet-related overhead used by some ISPs */
+++		} else if (strcmp(*argv, "ether-vlan") == 0) {
+++			/* 802.1q VLAN tag - may be repeated */
+++			overhead += 4;
+++			overhead_set = true;
+++
+++		/*
+++		 * DOCSIS cable shapers account for Ethernet frame with FCS,
+++		 * but not interframe gap nor preamble.
+++		 */
+++		} else if (strcmp(*argv, "docsis") == 0) {
+++			atm = 0;
+++			overhead += 18;
+++			overhead_set = true;
+++
+++		} else if (strcmp(*argv, "overhead") == 0) {
+++			char* p = NULL;
+++			NEXT_ARG();
+++			overhead = strtol(*argv, &p, 10);
+++			if(!p || *p || !*argv || overhead < -64 || overhead > 256) {
+++				fprintf(stderr, "Illegal \"overhead\", valid range is -64 to 256\\n");
+++				return -1;
+++			}
+++			overhead_set = true;
+++
+++		} else if (strcmp(*argv, "memlimit") == 0) {
+++			NEXT_ARG();
+++			if(get_size(&memlimit, *argv)) {
+++				fprintf(stderr, "Illegal value for \"memlimit\": \"%s\"\n", *argv);
+++				return -1;
+++			}
+++
+++		} else if (strcmp(*argv, "help") == 0) {
+++			explain();
+++			return -1;
+++		} else {
+++			fprintf(stderr, "What is \"%s\"?\n", *argv);
+++			explain();
+++			return -1;
+++		}
+++		argc--; argv++;
+++	}
+++
+++	tail = NLMSG_TAIL(n);
+++	addattr_l(n, 1024, TCA_OPTIONS, NULL, 0);
+++	if (bandwidth || unlimited)
+++		addattr_l(n, 1024, TCA_CAKE_BASE_RATE, &bandwidth, sizeof(bandwidth));
+++	if (diffserv)
+++		addattr_l(n, 1024, TCA_CAKE_DIFFSERV_MODE, &diffserv, sizeof(diffserv));
+++	if (atm != -1)
+++		addattr_l(n, 1024, TCA_CAKE_ATM, &atm, sizeof(atm));
+++	if (flowmode != -1)
+++		addattr_l(n, 1024, TCA_CAKE_FLOW_MODE, &flowmode, sizeof(flowmode));
+++	if (overhead_set)
+++		addattr_l(n, 1024, TCA_CAKE_OVERHEAD, &overhead, sizeof(overhead));
+++	if (overhead_override) {
+++		unsigned zero = 0;
+++		addattr_l(n, 1024, TCA_CAKE_ETHERNET, &zero, sizeof(zero));
+++	}
+++	if (interval)
+++		addattr_l(n, 1024, TCA_CAKE_RTT, &interval, sizeof(interval));
+++	if (target)
+++		addattr_l(n, 1024, TCA_CAKE_TARGET, &target, sizeof(target));
+++	if (autorate != -1)
+++		addattr_l(n, 1024, TCA_CAKE_AUTORATE, &autorate, sizeof(autorate));
+++	if (memlimit)
+++		addattr_l(n, 1024, TCA_CAKE_MEMORY, &memlimit, sizeof(memlimit));
+++	if (nat != -1)
+++		addattr_l(n, 1024, TCA_CAKE_NAT, &nat, sizeof(nat));
+++	if (wash != -1)
+++		addattr_l(n, 1024, TCA_CAKE_WASH, &wash, sizeof(wash));
+++
+++	tail->rta_len = (void *) NLMSG_TAIL(n) - (void *) tail;
+++	return 0;
+++}
+++
+++
+++static int cake_print_opt(struct qdisc_util *qu, FILE *f, struct rtattr *opt)
+++{
+++	struct rtattr *tb[TCA_CAKE_MAX + 1];
+++	unsigned bandwidth = 0;
+++	unsigned diffserv = 0;
+++	unsigned flowmode = 0;
+++	unsigned interval = 0;
+++	unsigned memlimit = 0;
+++	int overhead = 0;
+++	int ethernet = 0;
+++	int atm = 0;
+++	int nat = 0;
+++	int autorate = 0;
+++	int wash = 0;
+++	SPRINT_BUF(b1);
+++	SPRINT_BUF(b2);
+++
+++	if (opt == NULL)
+++		return 0;
+++
+++	parse_rtattr_nested(tb, TCA_CAKE_MAX, opt);
+++
+++	if (tb[TCA_CAKE_BASE_RATE] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_BASE_RATE]) >= sizeof(__u32)) {
+++		bandwidth = rta_getattr_u32(tb[TCA_CAKE_BASE_RATE]);
+++		if(bandwidth)
+++			fprintf(f, "bandwidth %s ", sprint_rate(bandwidth, b1));
+++		else
+++			fprintf(f, "unlimited ");
+++	}
+++	if (tb[TCA_CAKE_AUTORATE] &&
+++		RTA_PAYLOAD(tb[TCA_CAKE_AUTORATE]) >= sizeof(__u32)) {
+++		autorate = rta_getattr_u32(tb[TCA_CAKE_AUTORATE]);
+++		if(autorate == 1)
+++			fprintf(f, "autorate_ingress ");
+++		else if(autorate)
+++			fprintf(f, "(?autorate?) ");
+++	}
+++	if (tb[TCA_CAKE_DIFFSERV_MODE] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_DIFFSERV_MODE]) >= sizeof(__u32)) {
+++		diffserv = rta_getattr_u32(tb[TCA_CAKE_DIFFSERV_MODE]);
+++		switch(diffserv) {
+++		case 1:
+++			fprintf(f, "besteffort ");
+++			break;
+++		case 2:
+++			fprintf(f, "precedence ");
+++			break;
+++		case 3:
+++			fprintf(f, "diffserv8 ");
+++			break;
+++		case 4:
+++			fprintf(f, "diffserv4 ");
+++			break;
+++		case 5:
+++			fprintf(f, "diffserv-llt ");
+++			break;
+++		case 6:
+++			fprintf(f, "diffserv3 ");
+++			break;
+++		default:
+++			fprintf(f, "(?diffserv?) ");
+++			break;
+++		};
+++	}
+++	if (tb[TCA_CAKE_FLOW_MODE] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_FLOW_MODE]) >= sizeof(__u32)) {
+++		flowmode = rta_getattr_u32(tb[TCA_CAKE_FLOW_MODE]);
+++		nat = !!(flowmode & 64);
+++		flowmode &= ~64;
+++		switch(flowmode) {
+++		case 0:
+++			fprintf(f, "flowblind ");
+++			break;
+++		case 1:
+++			fprintf(f, "srchost ");
+++			break;
+++		case 2:
+++			fprintf(f, "dsthost ");
+++			break;
+++		case 3:
+++			fprintf(f, "hosts ");
+++			break;
+++		case 4:
+++			fprintf(f, "flows ");
+++			break;
+++		case 5:
+++			fprintf(f, "dual-srchost ");
+++			break;
+++		case 6:
+++			fprintf(f, "dual-dsthost ");
+++			break;
+++		case 7:
+++			fprintf(f, "triple-isolate ");
+++			break;
+++		default:
+++			fprintf(f, "(?flowmode?) ");
+++			break;
+++		};
+++
+++		if(nat)
+++			fprintf(f, "nat ");
+++	}
+++	if (tb[TCA_CAKE_WASH] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_WASH]) >= sizeof(__u32)) {
+++		wash = rta_getattr_u32(tb[TCA_CAKE_WASH]);
+++	}
+++	if (tb[TCA_CAKE_ATM] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_ATM]) >= sizeof(__u32)) {
+++		atm = rta_getattr_u32(tb[TCA_CAKE_ATM]);
+++	}
+++	if (tb[TCA_CAKE_OVERHEAD] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_OVERHEAD]) >= sizeof(__u32)) {
+++		overhead = rta_getattr_u32(tb[TCA_CAKE_OVERHEAD]);
+++	}
+++	if (tb[TCA_CAKE_ETHERNET] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_ETHERNET]) >= sizeof(__u32)) {
+++		ethernet = rta_getattr_u32(tb[TCA_CAKE_ETHERNET]);
+++	}
+++	if (tb[TCA_CAKE_RTT] &&
+++	    RTA_PAYLOAD(tb[TCA_CAKE_RTT]) >= sizeof(__u32)) {
+++		interval = rta_getattr_u32(tb[TCA_CAKE_RTT]);
+++	}
+++
+++	if (wash)
+++		fprintf(f,"wash ");
+++
+++	if (interval)
+++		fprintf(f, "rtt %s ", sprint_time(interval, b2));
+++
+++	if (!atm && overhead == ethernet) {
+++		fprintf(f, "raw ");
+++	} else {
+++		if (atm == 1)
+++			fprintf(f, "atm ");
+++		else if (atm == 2)
+++			fprintf(f, "ptm ");
+++		else
+++			fprintf(f, "noatm ");
+++
+++		fprintf(f, "overhead %d ", overhead);
+++
+++		// This is actually the *amount* of automatic compensation, but we only report
+++		// its presence as a boolean for now.
+++		if (ethernet)
+++			fprintf(f, "via-ethernet ");
+++	}
+++
+++	if (memlimit)
+++		fprintf(f, "memlimit %s", sprint_size(memlimit, b1));
+++
+++	return 0;
+++}
+++
+++static int cake_print_xstats(struct qdisc_util *qu, FILE *f,
+++				 struct rtattr *xstats)
+++{
+++	/* fq_codel stats format borrowed */
+++	struct tc_fq_codel_xstats *st;
+++	struct tc_cake_xstats     *stnc;
+++	SPRINT_BUF(b1);
+++	SPRINT_BUF(b2);
+++
+++	if (xstats == NULL)
+++		return 0;
+++
+++	if (RTA_PAYLOAD(xstats) < sizeof(st->type))
+++		return -1;
+++
+++	st   = RTA_DATA(xstats);
+++	stnc = RTA_DATA(xstats);
+++
+++	if (st->type == TCA_FQ_CODEL_XSTATS_QDISC && RTA_PAYLOAD(xstats) >= sizeof(*st)) {
+++		fprintf(f, "  maxpacket %u drop_overlimit %u new_flow_count %u ecn_mark %u",
+++			st->qdisc_stats.maxpacket,
+++			st->qdisc_stats.drop_overlimit,
+++			st->qdisc_stats.new_flow_count,
+++			st->qdisc_stats.ecn_mark);
+++		fprintf(f, "\n  new_flows_len %u old_flows_len %u",
+++			st->qdisc_stats.new_flows_len,
+++			st->qdisc_stats.old_flows_len);
+++	} else if (st->type == TCA_FQ_CODEL_XSTATS_CLASS && RTA_PAYLOAD(xstats) >= sizeof(*st)) {
+++		fprintf(f, "  deficit %d count %u lastcount %u ldelay %s",
+++			st->class_stats.deficit,
+++			st->class_stats.count,
+++			st->class_stats.lastcount,
+++			sprint_time(st->class_stats.ldelay, b1));
+++		if (st->class_stats.dropping) {
+++			fprintf(f, " dropping");
+++			if (st->class_stats.drop_next < 0)
+++				fprintf(f, " drop_next -%s",
+++					sprint_time(-st->class_stats.drop_next, b1));
+++			else
+++				fprintf(f, " drop_next %s",
+++					sprint_time(st->class_stats.drop_next, b1));
+++		}
+++	} else if (stnc->version >= 1 && stnc->version < 0xFF
+++				&& stnc->max_tins == TC_CAKE_MAX_TINS
+++				&& RTA_PAYLOAD(xstats) >= offsetof(struct tc_cake_xstats, capacity_estimate))
+++	{
+++		int i;
+++
+++		if(stnc->version >= 3)
+++			fprintf(f, " memory used: %s of %s\n", sprint_size(stnc->memory_used, b1), sprint_size(stnc->memory_limit, b2));
+++
+++		if(stnc->version >= 2)
+++			fprintf(f, " capacity estimate: %s\n", sprint_rate(stnc->capacity_estimate, b1));
+++
+++		switch(stnc->tin_cnt) {
+++		case 3:
+++			fprintf(f, "                 Bulk   Best Effort      Voice\n");
+++			break;
+++
+++		case 4:
+++			fprintf(f, "                 Bulk   Best Effort      Video       Voice\n");
+++			break;
+++
+++		case 5:
+++			fprintf(f, "              Low Loss  Best Effort   Low Delay       Bulk  Net Control\n");
+++			break;
+++
+++		default:
+++			fprintf(f, "          ");
+++			for(i=0; i < stnc->tin_cnt; i++)
+++				fprintf(f, "       Tin %u", i);
+++			fprintf(f, "\n");
+++		};
+++
+++		fprintf(f, "  thresh  ");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12s", sprint_rate(stnc->threshold_rate[i], b1));
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  target  ");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12s", sprint_time(stnc->target_us[i], b1));
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  interval");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12s", sprint_time(stnc->interval_us[i], b1));
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  pk_delay");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12s", sprint_time(stnc->peak_delay_us[i], b1));
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  av_delay");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12s", sprint_time(stnc->avge_delay_us[i], b1));
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  sp_delay");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12s", sprint_time(stnc->base_delay_us[i], b1));
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  pkts    ");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->sent[i].packets);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  bytes   ");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12llu", stnc->sent[i].bytes);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  way_inds");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->way_indirect_hits[i]);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  way_miss");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->way_misses[i]);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  way_cols");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->way_collisions[i]);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  drops   ");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->dropped[i].packets);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  marks   ");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->ecn_marked[i].packets);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  sp_flows");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->sparse_flows[i]);
+++		fprintf(f, "\n");
+++
+++		fprintf(f, "  bk_flows");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->bulk_flows[i]);
+++		fprintf(f, "\n");
+++
+++		if(stnc->version >= 4) {
+++			fprintf(f, "  un_flows");
+++			for(i=0; i < stnc->tin_cnt; i++)
+++				fprintf(f, "%12u", stnc->unresponse_flows[i]);
+++			fprintf(f, "\n");
+++		}
+++
+++		fprintf(f, "  max_len ");
+++		for(i=0; i < stnc->tin_cnt; i++)
+++			fprintf(f, "%12u", stnc->max_skblen[i]);
+++		fprintf(f, "\n");
+++	} else {
+++		return -1;
+++	}
+++	return 0;
+++}
+++
+++struct qdisc_util cake_qdisc_util = {
+++	.id		= "cake",
+++	.parse_qopt	= cake_parse_opt,
+++	.print_qopt	= cake_print_opt,
+++	.print_xstats	= cake_print_xstats,
+++};
+diff --git a/package/system/fstools/files/fstab.init b/package/system/fstools/files/fstab.init
+index f995e96544..5faa8ecbb9 100644
+--- a/package/system/fstools/files/fstab.init
++++ b/package/system/fstools/files/fstab.init
+@@ -3,12 +3,14 @@
+ 
+ START=40
+ 
+-start() {                            
+-	echo "this file has been obsoleted. please call \"/sbin/block mount\" directly"
++boot() {
+ 	/sbin/block mount
+ }
+ 
+-stop() {                            
+-	echo "this file has been obsoleted. please call \"/sbin/block umount\" directly"
++start() {
++	echo "this file has been obsoleted. please call \"/sbin/block mount\" directly"
++}
++
++stop() {
+ 	/sbin/block umount
+ }
+diff --git a/package/utils/busybox/files/ntpd-hotplug b/package/utils/busybox/files/ntpd-hotplug
+index ddc1490a47..8d6d609166 100755
+--- a/package/utils/busybox/files/ntpd-hotplug
++++ b/package/utils/busybox/files/ntpd-hotplug
+@@ -1,3 +1,2 @@
+ #!/bin/sh
+-[ "$1" = stratum ] || exit 0
+ ACTION="$1" /sbin/hotplug-call ntp
+diff --git a/scripts/getver.sh b/scripts/getver.sh
+index 549d529e42..9893f16d69 100755
+--- a/scripts/getver.sh
++++ b/scripts/getver.sh
+@@ -19,7 +19,7 @@ try_svn() {
+ try_git() {
+ 	git rev-parse --git-dir >/dev/null 2>&1 || return 1
+ 	REV="$(git describe --tags | sed "s/trunk-\([0-9]*\)-.*/\1/g")"
+-	REV="$((REV+12009))"
++	REV="${REV:+r$((REV+12009))}"
+ 	[ -n "$REV" ]
+ }
+ 
