@@ -1,0 +1,13 @@
+Index: hello-2.10/m4/error.m4
+===================================================================
+--- hello-2.10.orig/m4/error.m4
++++ hello-2.10/m4/error.m4
+@@ -15,7 +15,7 @@ AC_DEFUN([gl_ERROR],
+        [AC_LANG_PROGRAM(
+           [[#include <error.h>]],
+           [[error_at_line (0, 0, "", 0, "an error occurred");]])],
+-       [ac_cv_lib_error_at_line=yes],
++       [ac_cv_lib_error_at_line=no],
+        [ac_cv_lib_error_at_line=no])])
+ ])
+ 
